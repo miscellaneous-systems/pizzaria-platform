@@ -10,9 +10,11 @@ node_modules/
 .DS_Store
 *.log
 
-# Build / cache
 .next/
 out/
 dist/
 .expo/
 *.tsbuildinfo
+
+# Documentação local de API (não versionar)
+endpoint.md
