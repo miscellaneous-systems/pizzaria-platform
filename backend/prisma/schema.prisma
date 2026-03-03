@@ -1,0 +1,80 @@
+//Para criar migrate no banco de dados, rodar o comando: npx prisma migrate dev --name <nome da migration>
+//Refrescar a base de dados, rodar o comando: npx prisma generate
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  STAFF
+  ADMIN
+}
+
+model User {
+    id String @id @default(uuid())
+    name String
+    email String @unique
+    password String
+    role Role @default(STAFF)
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@map("users")
+}
+
+model Category {
+  id String @id @default(uuid())
+  name String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  products Product[]
+
+  @@map("categories")
+}
+
+model Product {
+  id String @id @default(uuid())
+  name String
+  price Int
+  description String
+  banner String
+  disabled Boolean @default(false)
+  category_id String
+  category Category @relation(fields: [category_id], references: [id], onDelete: Cascade)
+  items Item[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("products")
+}
+
+model Order {
+  id String @id @default(uuid())
+  table Int
+  status Boolean @default(false) // false = pending, true = ready
+  draft Boolean @default(true) // false = not delivered, true = delivered to the kitchen
+  name String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  items Item[]
+
+  @@map ("orders")
+}
+
+model Item {
+  id String @id @default(uuid())
+  amount Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  order_id String
+  order Order @relation(fields: [order_id], references: [id], onDelete: Cascade)
+  product_id String
+  product Product @relation(fields: [product_id], references: [id], onDelete: Cascade)
+
+  @@map("items")
+}
+
