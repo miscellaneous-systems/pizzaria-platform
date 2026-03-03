@@ -131,17 +131,6 @@ npm start
 
 Use as opções no terminal para abrir em Android, iOS ou web.
 
----
-
-## Deploy sugerido
-
-- **Frontend:** Vercel (definir *Root Directory* como `frontend`)
-- **Backend:** Render (Web Service, *Root Directory* como `backend`, plano gratuito disponível)
-- **Mobile:** build Expo (EAS Build) ou publicação nas lojas; versão web pode ser hospedada na Vercel com *Root Directory* `mobile`
-
-Um único repositório no GitHub basta: cada plataforma usa o *root directory* correspondente.
-
----
 
 ## Licença
 
