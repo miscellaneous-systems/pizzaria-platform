@@ -52,12 +52,23 @@ model Product {
   @@map("products")
 }
 
+enum PaymentMethod {
+  MONEY
+  PIX
+  CARD
+}
+
 model Order {
   id String @id @default(uuid())
   table Int
   status Boolean @default(false) // false = pending, true = ready
   draft Boolean @default(true) // false = not delivered, true = delivered to the kitchen
   name String?
+
+  paymentMethod PaymentMethod @default(MONEY)
+  tip Int @default(0)
+
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   items Item[]
