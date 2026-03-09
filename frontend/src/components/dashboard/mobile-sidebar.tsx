@@ -3,7 +3,7 @@
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ShoppingCart, Package, Tags, LogOut, Menu } from "lucide-react";
+import { ShoppingCart, Package, Tags, LogOut, Menu, DollarSign } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { logoutAction } from "@/actions/auth";
 import { useState } from "react";
@@ -24,6 +24,11 @@ const menuItems = [
         title: "Categorias",
         href: "/dashboard/categories",
         icon: Tags,
+    },
+    {
+        title: "Fluxo de Caixa",
+        href: "/dashboard/cashflow",
+        icon: DollarSign,
     }
 ];
 

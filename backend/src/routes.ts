@@ -26,6 +26,8 @@ import { SendOrderController } from "./controllers/order/SendOrderController";
 import { FinishOrderController } from "./controllers/order/FinishOrderController";
 import { finishOrderSchema } from "./schemas/orderSchema";
 import { DeleteOrderController } from "./controllers/order/DeleteOrderController";
+import { DailyCashFlowController } from "./controllers/cashflow/DailyCashFlowController";
+import { dailyCashFlowSchema } from "./schemas/cashFlowSchema";
 
 
 const router = Router();
@@ -139,6 +141,14 @@ router.delete("/order",
     isAuthenticated,
     validateSchema(deleteOrderSchema),
     new DeleteOrderController().handle
+);
+
+//Rotas cashflow
+
+router.get("/cashflow/daily",
+    isAuthenticated,
+    validateSchema(dailyCashFlowSchema),
+    new DailyCashFlowController().handle
 );
 
 export { router };

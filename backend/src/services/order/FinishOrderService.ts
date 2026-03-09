@@ -2,10 +2,12 @@ import prismaClient from "../../prisma/index";
 
 interface FinishOrderProps {
     order_id: string;
+    paymentMethod: string;
+    tip: number;
 }
 
 class FinishOrderService {
-    async execute({ order_id }: FinishOrderProps) {
+    async execute({ order_id, paymentMethod, tip }: FinishOrderProps) {
         try {
             const order = await prismaClient.order.findFirst({
             where: {
@@ -23,6 +25,8 @@ class FinishOrderService {
             },
             data: {
                 status: true,
+                paymentMethod: paymentMethod as "MONEY" | "PIX" | "CARD",
+                tip: tip
             },
             select: {
                 id: true,
