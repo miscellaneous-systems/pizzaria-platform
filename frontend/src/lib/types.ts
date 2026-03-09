@@ -57,3 +57,24 @@ export interface Order {
     createdAt: string;
     items?: Item[];
 }
+
+export interface OrderWithTotal {
+    id: string;
+    table: number;
+    name: string | null;
+    total: number;
+    paymentMethod: string;
+    tip: number;
+    createdAt: string;
+}
+
+export interface DailyCashFlow {
+    date: string;
+    total: number;
+    totalMoney: number;
+    totalPix: number;
+    totalCard: number;
+    totalTip: number;
+    ordersCount: number;
+    orders: OrderWithTotal[];
+}
