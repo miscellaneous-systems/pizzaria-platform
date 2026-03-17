@@ -9,10 +9,10 @@ import { CashflowDatePicker } from "@/components/dashboard/cashflow-date-picker"
 export default async function CashflowPage({
     searchParams,
 }: {
-    searchParams: { date?: string };
+    searchParams: Promise<{ date?: string }>;
 }) {
     const token = await getToken();
-    const date = searchParams.date;
+    const { date } = await searchParams;
 
     const cashflow = await apiClient<DailyCashFlow>(
         `/cashflow/daily${date ? `?date=${date}` : ""}`,

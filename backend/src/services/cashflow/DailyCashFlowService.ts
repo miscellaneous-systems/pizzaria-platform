@@ -91,6 +91,7 @@ class DailyCashFlowService {
             };
 
         } catch (error) {
+            console.error("Error fetching daily cash flow:", error);
             throw new Error("Falha ao buscar fluxo de caixa diário");
         }
     }
