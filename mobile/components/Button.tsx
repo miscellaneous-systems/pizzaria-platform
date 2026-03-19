@@ -20,15 +20,17 @@ export function Button({
 
 
     const backgroundColor = variant === 'primary' ? colors.green : colors.brand;
+    const isDisabled = disabled || loading;
 
     return (
         <TouchableOpacity 
         style={[
             styles.button,
             { backgroundColor },
-            (disabled || loading) && styles.buttonDisabled,
+            isDisabled && styles.buttonDisabled,
             style,
         ]}
+        disabled={isDisabled}
         {...rest}
         >
             {loading ? <ActivityIndicator color={colors.background} /> 

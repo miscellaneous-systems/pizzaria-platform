@@ -3,7 +3,7 @@ import prismaClient from "../../prisma/index";
 interface FinishOrderProps {
     order_id: string;
     paymentMethod: string;
-    tip: number;
+    tip?: number | null;
 }
 
 class FinishOrderService {
@@ -26,7 +26,7 @@ class FinishOrderService {
             data: {
                 status: true,
                 paymentMethod: paymentMethod as "MONEY" | "PIX" | "CARD",
-                tip: tip
+                tip: tip ?? 0,
             },
             select: {
                 id: true,

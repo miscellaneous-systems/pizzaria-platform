@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogFooter,
@@ -11,7 +12,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { formatCurrency } from "@/lib/utils";
 import { finishOrderAction } from "@/actions/orders";
-import {useRouter} from "next/navigation";
+import { useRouter } from "next/navigation";
 import { Badge } from "../ui/badge";
 
 interface OrderModalProps {
@@ -23,6 +24,8 @@ interface OrderModalProps {
 export function OrderModal({ onClose, orderId, token }: OrderModalProps) {
   const [order, setOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState(false);
+  const [finishError, setFinishError] = useState<string | null>(null);
+  const [finishing, setFinishing] = useState(false);
   const router = useRouter();
   const fetchOrder = async () => {
     if (!orderId) {
@@ -67,27 +70,45 @@ export function OrderModal({ onClose, orderId, token }: OrderModalProps) {
     }, 0);
   };
 
+  const paymentMethodLabel: Record<string, string> = {
+    MONEY: "Dinheiro",
+    PIX: "PIX",
+    CARD: "Cartão",
+  };
+
   const handleFinishOrder = async () => {
+    if (!orderId) return;
 
-    if(!orderId) return;
+    setFinishError(null);
+    setFinishing(true);
 
-    const result = await finishOrderAction(orderId);
-    if(result.success) {
+    const result = await finishOrderAction(
+        orderId,
+        (order?.paymentMethod as "MONEY" | "PIX" | "CARD") ?? "MONEY",
+        order?.tip ?? 0
+    );
+
+    setFinishing(false);
+
+    if (result.success) {
       onClose();
       router.refresh();
-    }
-    else {
-      console.log(result.error);
+    } else {
+      setFinishError(result.error ?? "Falha ao finalizar pedido");
     }
   };
 
   return (
     <Dialog open={orderId !== null} onOpenChange={() => onClose()}>
-      <DialogContent className="p-6 bg-app-card text-white max-w-2xl border-app-border">
-        <DialogHeader>
+      <DialogContent className="flex max-h-[90vh] flex-col p-6 bg-app-card text-white max-w-2xl border-app-border">
+        <DialogHeader className="shrink-0">
           <DialogTitle className="text-2xl font-bold">
             Detalhe do pedido
           </DialogTitle>
+          <DialogDescription className="sr-only">
+            Exibe as informacoes completas do pedido selecionado, incluindo
+            cliente, forma de pagamento, itens e total.
+          </DialogDescription>
         </DialogHeader>
 
         {loading ? (
@@ -95,7 +116,7 @@ export function OrderModal({ onClose, orderId, token }: OrderModalProps) {
             <p className="text-gray-400">Carregando...</p>
           </div>
         ) : order ? (
-          <div className="space-y-6">
+          <div className="min-h-0 flex-1 space-y-6 overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             {/* Informações do pedido */}
             <div className="grid grid-cols-1 gap-4">
               <div>
@@ -113,6 +134,20 @@ export function OrderModal({ onClose, orderId, token }: OrderModalProps) {
                 <Badge variant="secondary" className="text-xs select-none">
                   Em produção
                 </Badge>
+              </div>
+              <div>
+                <p className="text-sm text-gray-400 mb-1">Forma de pagamento</p>
+                <p className="text-lg font-semibold">
+                  {order.paymentMethod
+                    ? paymentMethodLabel[order.paymentMethod] ?? order.paymentMethod
+                    : "—"}
+                </p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-400 mb-1">Gorjeta</p>
+                <p className="text-lg font-semibold">
+                  {formatCurrency(order.tip ?? 0)}
+                </p>
               </div>
             </div>
 
@@ -172,7 +207,11 @@ export function OrderModal({ onClose, orderId, token }: OrderModalProps) {
           </div>
         ) : null}
 
-        <DialogFooter className="flex gap-3 sm:gap-3">
+        {finishError && (
+          <p className="shrink-0 text-sm text-red-400 px-1">{finishError}</p>
+        )}
+
+        <DialogFooter className="shrink-0 flex gap-3 sm:gap-3">
           <Button
             variant="outline"
             onClick={() => onClose()}
@@ -182,10 +221,10 @@ export function OrderModal({ onClose, orderId, token }: OrderModalProps) {
           </Button>
           <Button
             className="flex-1 bg-brand-primary hover:bg-brand-primary/90 text-white font-semibold"
-            disabled={loading}
+            disabled={loading || finishing}
             onClick={() => handleFinishOrder()}
           >
-            Finalizar pedido
+            {finishing ? "Finalizando..." : "Finalizar pedido"}
           </Button>
         </DialogFooter>
       </DialogContent>

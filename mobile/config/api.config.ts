@@ -12,6 +12,6 @@
 
 
 export const API_CONFIG = {
-    BASE_URL: process.env.EXPO_PUBLIC_API_URL,
+    BASE_URL: process.env.EXPO_PUBLIC_API_URL || "http://192.168.18.141:3001",
     TIMEOUT: 5000,
   };

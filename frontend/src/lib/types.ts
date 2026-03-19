@@ -54,6 +54,8 @@ export interface Order {
     name?: string;
     status: boolean;
     draft: boolean;
+    paymentMethod?: string;
+    tip?: number;
     createdAt: string;
     items?: Item[];
 }

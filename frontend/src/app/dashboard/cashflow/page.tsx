@@ -121,6 +121,7 @@ export default async function CashflowPage({
                     <CardContent>
                         <div className="text-lg font-semibold">
                             {new Date(cashflow.date).toLocaleDateString("pt-BR", {
+                                timeZone: "UTC",
                                 day: "2-digit",
                                 month: "2-digit",
                                 year: "numeric",
@@ -156,7 +157,13 @@ export default async function CashflowPage({
                                         </div>
                                         <div className="flex items-center gap-2 mt-1">
                                             <span className="text-xs px-2 py-1 rounded bg-gray-700">
-                                                {order.paymentMethod}
+                                                {order.paymentMethod === "MONEY"
+                                                    ? "Dinheiro"
+                                                    : order.paymentMethod === "PIX"
+                                                    ? "PIX"
+                                                    : order.paymentMethod === "CARD"
+                                                    ? "Cartão"
+                                                    : "Outro"}
                                             </span>
                                             {order.tip > 0 && (
                                                 <span className="text-xs text-yellow-400">

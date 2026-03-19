@@ -1,7 +1,7 @@
 import { View, Text, ActivityIndicator, StyleSheet, Pressable, ScrollView, Alert } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { Category, Product, Item } from '@/types';
+import type { Category, Product, Item, Order } from '@/types';
 import api from '@/services/api';
 import { Button } from '@/components/Button';
 import { colors, fontSize, spacing } from '@/constants/theme';
@@ -29,12 +29,15 @@ export default function Order() {
     const [loadingAddItem, setLoadingAddItem] = useState(false);
 
     const [items, setItems] = useState<Item[]>([]);
+    const [loadingOrders, setLoadingOrder] = useState(false);
 
     const insets = useSafeAreaInsets();
 
 
 
-
+    useEffect(() => {
+        loadOrderDetail();
+    }, [order_id]);
 
 
     useEffect(() => {
@@ -52,6 +55,20 @@ export default function Order() {
             setSelectedCategory("");
         }
     }, [selectedCategory]);
+
+
+    async function loadOrderDetail() {
+        if (!order_id) return;
+        try {
+            setLoadingOrder(true);
+            const response = await api.get<Order>('/order/detail', { params: { order_id } });
+            setItems(response.data.items ?? []);
+        } catch (error) {
+            console.log(error);
+        } finally {
+            setLoadingOrder(false);
+        }
+    }
 
     async function loadCategories() {
         try {
@@ -86,7 +103,7 @@ export default function Order() {
 
     async function handleRemoveItem(item_id: string) {
         try {
-            const response = await api.delete<Item>("/order/remove", {
+            await api.delete<Item>("/order/remove", {
                 params: {
                     item_id: item_id,
                 },
@@ -104,6 +121,7 @@ export default function Order() {
 
     async function handleAddItem() {
         try {
+            setLoadingAddItem(true);
 
             const response = await api.post<Item>('/order/add', {
                 order_id: order_id,
@@ -111,7 +129,7 @@ export default function Order() {
                 amount: quantity,
             });
 
-            setItems([...items, response.data]);
+            setItems((prevItems) => [...prevItems, response.data]);
             setQuantity(1);
             setSelectedProduct("");
 
@@ -137,7 +155,7 @@ export default function Order() {
         });
     }
 
-    if (loadingCategories) {
+    if (loadingCategories || loadingOrders) {
         return (
             <View style={styles.loadingContainer}>
                 <ActivityIndicator size="large" color={colors.brand} />
@@ -205,7 +223,7 @@ export default function Order() {
                 )}
 
                 {selectedProduct && (
-                    <Button title="Adicionar" onPress={handleAddItem} variant="secondary">
+                    <Button title="Adicionar" onPress={handleAddItem} variant="secondary" loading={loadingAddItem}>
                     </Button>
                 )}
 

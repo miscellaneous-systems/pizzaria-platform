@@ -32,6 +32,8 @@ export const sendOrderSchema = z.object({
     body: z.object({
         order_id: z.string({ message: "ID do pedido é obrigatório" }).min(1, { message: "ID do pedido é obrigatório" }),
         name: z.string({ message: "O nome é obrigatório" }).min(1, { message: "O nome é obrigatório" }),
+        paymentMethod: z.enum(['MONEY', 'PIX', 'CARD']).optional().default('MONEY'),
+        tip: z.number().int().min(0).optional().default(0),
     }),
 });
 
@@ -39,6 +41,7 @@ export const finishOrderSchema = z.object({
     body: z.object({
         order_id: z.string({ message: "ID do pedido é obrigatório" }).min(1, { message: "ID do pedido é obrigatório" }),
         paymentMethod: z.enum(['MONEY', 'PIX', 'CARD'], { message: "O método de pagamento é obrigatório" }),
+        tip: z.number().int().min(0).optional().nullable().default(0),
     }),
 }); 
 

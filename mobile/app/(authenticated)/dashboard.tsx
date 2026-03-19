@@ -1,6 +1,6 @@
 import { useAuth } from '@/contexts/AuthContext';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, KeyboardAvoidingView, Platform } from 'react-native'
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { Input } from '@/components/Input';
 import { Button } from '@/components/Button';
 import { colors, fontSize, spacing, borderRadius } from '@/constants/theme';
@@ -10,6 +10,8 @@ import api from '@/services/api';
 import { Order } from '@/types';
 import { useRouter } from 'expo-router';
 import { useHeaderHeight } from '@react-navigation/elements';
+import { useFocusEffect } from '@react-navigation/native';
+
 
 export default function Dashboard() {
 
@@ -18,22 +20,54 @@ export default function Dashboard() {
   const router = useRouter();
   const [tableNumber, setTableNumber] = useState('');
   const [loading, setLoading] = useState(false);
+  const [openOrders, setOpenOrders] = useState<Order[]>([]);
+  const [loadingOpenOrders, setLoadingOpenOrders] = useState(false);
   const headerHeight = useHeaderHeight();
-  
+
+  const loadOpenOrders = useCallback(async () => {
+    try {
+      setLoadingOpenOrders(true);
+      const response = await api.get<Order[]>('/orders', { params: { status: "false" } });
+      setOpenOrders(response.data);
+    } catch (error) {
+      console.error('Erro ao carregar pedidos abertos:', error);
+    } finally {
+      setLoadingOpenOrders(false);
+    }
+  }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      loadOpenOrders();
+    }, [loadOpenOrders])
+  );
+
   async function handleOpenTable() {
-    if(!tableNumber) {
+    if (!tableNumber) {
       alert('Erro: Informe o número da mesa');
       return;
     }
-    
+
     const table = parseInt(tableNumber);
 
-    if(isNaN(table) || table <= 0) {
+    if (isNaN(table) || table <= 0) {
       alert('Erro: Informe um número válido');
       return;
     }
 
-    try{
+    const existingOrder = openOrders.find(order => order.table === table);
+    if (existingOrder) {
+      router.push({
+        pathname: "/(authenticated)/order",
+        params: {
+          table: existingOrder.table.toString(), order_id: existingOrder.id,
+        },
+      });
+      setTableNumber('');
+      return;
+    }
+
+    try {
       setLoading(true);
 
       const response = await api.post<Order>('/order', {
@@ -50,12 +84,14 @@ export default function Dashboard() {
       });
 
       setTableNumber('');
-    }catch(error){
+    } catch (error) {
       alert('Erro: Falha ao abrir mesa, tente novamente mais tarde');
       console.log(error);
-    }finally{
+    } finally {
       setLoading(false);
     }
+
+    await loadOpenOrders();
   }
 
   return (
@@ -84,21 +120,43 @@ export default function Dashboard() {
             </View>
 
             <Text style={styles.title}>Novo pedido</Text>
-            <Input 
-            placeholder="Numero da mesa"
-            style={styles.input}
-            placeholderTextColor={colors.gray}
-            value={tableNumber}
-            onChangeText={setTableNumber}
-            keyboardType="numeric"
+            <Input
+              placeholder="Numero da mesa"
+              style={styles.input}
+              placeholderTextColor={colors.gray}
+              value={tableNumber}
+              onChangeText={setTableNumber}
+              keyboardType="numeric"
             ></Input>
 
-            <Button title="Abrir mesa" onPress={handleOpenTable} />
+            <Button title="Abrir mesa" onPress={handleOpenTable} loading={loading} />
+
+            {loadingOpenOrders && <Text style={styles.sectionInfo}>Carregando mesas abertas...</Text>}
+
+            {!loadingOpenOrders && openOrders.length > 0 && (
+              <View style={styles.openOrdersSection}>
+                <Text style={styles.openOrdersTitle}>Mesas abertas</Text>
+                {openOrders.map((order) => (
+                  <TouchableOpacity
+                    key={order.id}
+                    style={styles.openOrderCard}
+                    onPress={() => router.push({
+                      pathname: "/(authenticated)/order",
+                      params: {
+                        table: order.table.toString(),
+                        order_id: order.id
+                      },
+                    })
+                    }
+                  >
+                    <Text style={styles.openOrderText}>Mesa {order.table}</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            )}
 
           </View>
-
         </ScrollView>
-
       </KeyboardAvoidingView>
     </View>
   )
@@ -160,5 +218,31 @@ const styles = StyleSheet.create({
   },
   input: {
     marginBottom: spacing.md,
+  },
+  openOrdersSection: { 
+    marginTop: spacing.lg, 
+    gap: spacing.sm 
+  },
+  openOrdersTitle: { 
+    color: colors.primary, 
+    fontSize: fontSize.lg, 
+    fontWeight: 'bold' 
+  },
+  sectionInfo: { 
+    color: colors.gray, 
+    textAlign: 'center', 
+    marginTop: spacing.sm 
+  },
+  openOrderCard: {
+    backgroundColor: colors.backgroundInput,
+    borderWidth: 1,
+    borderColor: colors.borderColor,
+    borderRadius: borderRadius.md,
+    padding: spacing.md,
+  },
+  openOrderText: { 
+    color: colors.primary, 
+    fontSize: fontSize.md, 
+    fontWeight: '600' 
   },
 });

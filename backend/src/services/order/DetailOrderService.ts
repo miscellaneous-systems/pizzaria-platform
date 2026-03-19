@@ -17,6 +17,8 @@ class DetailOrderService {
                     name: true,
                     status: true,
                     draft: true,
+                    paymentMethod: true,
+                    tip: true,
                     createdAt: true,
                     updatedAt: true,
                     items: {

@@ -3,10 +3,12 @@ import prismaClient from "../../prisma/index";
 interface SendOrderProps {
     order_id: string;
     name: string;
+    paymentMethod: string;
+    tip: number;
 }
 
 class SendOrderService {
-    async execute({ order_id, name }: SendOrderProps) {
+    async execute({ order_id, name, paymentMethod, tip }: SendOrderProps) {
         try {
             const order = await prismaClient.order.findFirst({
             where: {
@@ -24,7 +26,9 @@ class SendOrderService {
             },
             data: {
                 draft: false,
-                name: name
+                name: name,
+                paymentMethod: paymentMethod as "MONEY" | "PIX" | "CARD",
+                tip: tip ?? 0,
             },
             select: {
                 id: true,

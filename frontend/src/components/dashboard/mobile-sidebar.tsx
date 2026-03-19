@@ -7,7 +7,7 @@ import { ShoppingCart, Package, Tags, LogOut, Menu, DollarSign } from "lucide-re
 import { Button } from "@/components/ui/button";
 import { logoutAction } from "@/actions/auth";
 import { useState } from "react";
-import { Sheet, SheetContent, SheetTrigger, SheetClose, SheetDescription, SheetFooter, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 
 const menuItems = [
     {
@@ -53,6 +53,9 @@ export function MobileSidebar() {
                                 <SheetTitle className="text-xl text-white font-bold">
                                     Menu
                                 </SheetTitle>
+                                <SheetDescription className="sr-only">
+                                    Menu lateral com links para pedidos, produtos, categorias e fluxo de caixa.
+                                </SheetDescription>
                             </SheetHeader>
                             <nav className="flex flex-col flex-1 p-4 space-y-4">
                                 {menuItems.map((menu) => {

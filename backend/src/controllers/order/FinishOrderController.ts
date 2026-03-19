@@ -9,8 +9,8 @@ class FinishOrderController {
         
         const result = await finishOrder.execute({ 
             order_id: order_id,
-            paymentMethod: paymentMethod,
-            tip: tip || 0
+            paymentMethod: paymentMethod as string,
+            tip: tip ?? 0,
         });
         
         res.status(200).json(result);
